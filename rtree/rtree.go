@@ -104,10 +104,16 @@ func (r *RTree) Insert(obj shapes.Spatial) {
 	r.size++
 }
 
-// Update delete and insert object
+// Update delete and insert object atomically
 func (r *RTree) Update(obj shapes.Spatial) {
-	r.Delete(obj)
-	r.Insert(obj)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.deleteInternal(obj)
+
+	e := entry{obj.Bounds(), nil, obj}
+	r.insert(e, 1)
+	r.size++
 }
 
 // Collision check shapes.Spatial object on collisions
@@ -378,11 +384,17 @@ func pickNext(left, right *node, entries []entry) (next int) {
 	return
 }
 
-// MoveObject move object
+// MoveObject move object atomically
 func (r *RTree) MoveObject(obj Moveable, v shapes.Point) {
-	r.Delete(obj)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.deleteInternal(obj)
 	obj.UpdateSpatial(obj.Move(v))
-	r.Insert(obj)
+
+	e := entry{obj.Bounds(), nil, obj}
+	r.insert(e, 1)
+	r.size++
 }
 
 // Delete removes an object from the tree
@@ -390,6 +402,11 @@ func (r *RTree) Delete(obj shapes.Spatial) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	return r.deleteInternal(obj)
+}
+
+// deleteInternal removes an object from the tree without acquiring locks.
+func (r *RTree) deleteInternal(obj shapes.Spatial) bool {
 	n := r.findLeaf(r.root, obj)
 	if n == nil {
 		return false

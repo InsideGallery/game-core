@@ -4,5 +4,5 @@ import "errors"
 
 // All kind of errors
 var (
-	ErrNotFoundAttachedParticle = errors.New("not found attache particle")
+	ErrNotFoundAttachedParticle = errors.New("not found attached particle")
 )

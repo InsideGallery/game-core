@@ -18,7 +18,7 @@ func (c *Composite) AddParticle(p *Particle) {
 
 // GetParticle get particle by index
 func (c *Composite) GetParticle(i int) (*Particle, error) {
-	if i > len(c.Particles) || i < 0 {
+	if i >= len(c.Particles) || i < 0 {
 		return nil, ErrNotFoundAttachedParticle
 	}
 

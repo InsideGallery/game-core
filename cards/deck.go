@@ -92,8 +92,13 @@ func (d *Deck) GetTopCards(n int) ([]int, error) {
 		return []int{}, nil
 	}
 
+	if n > len(d.cards) {
+		return nil, ErrNoCardsInDeck
+	}
+
 	result := make([]int, n)
 	copy(result, d.cards[:n])
+	d.cards = d.cards[n:]
 
 	return result, nil
 }

@@ -189,3 +189,112 @@ func TestRotateBy(t *testing.T) {
 	p = RotateBy(NewPoint(1, 2, 3), DegreesToRadian(90), 2)
 	testutils.Equal(t, p.Round(0.1), NewPoint(-2, 1, 3))
 }
+
+func TestRadianToDegree(t *testing.T) {
+	tests := map[string]struct {
+		radian float64
+		want   float64
+	}{
+		"zero": {
+			radian: 0,
+			want:   0,
+		},
+		"pi": {
+			radian: 3.141592653589793,
+			want:   180,
+		},
+		"pi/2": {
+			radian: 1.5707963267948966,
+			want:   90,
+		},
+		"2pi": {
+			radian: 6.283185307179586,
+			want:   0,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			testutils.Equal(t, mathutils.RoundWithPrecision(RadianToDegree(tc.radian), 0.1), tc.want)
+		})
+	}
+}
+
+func TestGetAngle2D(t *testing.T) {
+	tests := map[string]struct {
+		v1 Point
+		v2 Point
+	}{
+		"same point": {
+			v1: NewPoint(0, 0),
+			v2: NewPoint(0, 0),
+		},
+		"right": {
+			v1: NewPoint(1, 0),
+			v2: NewPoint(0, 0),
+		},
+		"up": {
+			v1: NewPoint(0, 1),
+			v2: NewPoint(0, 0),
+		},
+		"diagonal": {
+			v1: NewPoint(1, 1),
+			v2: NewPoint(0, 0),
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			angle := GetAngle2D(tc.v1, tc.v2)
+			_ = angle // should not panic
+		})
+	}
+
+	// Test specific known angle
+	angle := GetAngle2D(NewPoint(1, 0), NewPoint(0, 0))
+	testutils.Equal(t, mathutils.RoundWithPrecision(angle, 0.0001), 0.0)
+}
+
+func TestGetDiffPoint2D(t *testing.T) {
+	tests := map[string]struct {
+		angle    float64
+		velocity float64
+	}{
+		"zero angle": {
+			angle:    0,
+			velocity: 10,
+		},
+		"90 degrees": {
+			angle:    1.5707963267948966,
+			velocity: 10,
+		},
+		"zero velocity": {
+			angle:    1,
+			velocity: 0,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			p := GetDiffPoint2D(tc.angle, tc.velocity)
+			testutils.Equal(t, p.Coordinate(2), 0.0) // z should always be 0
+		})
+	}
+
+	// Test specific: angle=0, velocity=10 should give (10,0,0)
+	p := GetDiffPoint2D(0, 10)
+	testutils.Equal(t, p.Round(0.01), NewPoint(10, 0, 0))
+}
+
+func TestCoordinatesToPoint(t *testing.T) {
+	c := [3]float64{1, 2, 3}
+	p := CoordinatesToPoint(c)
+	testutils.Equal(t, p, NewPoint(1, 2, 3))
+
+	c2 := [3]float64{0, 0, 0}
+	p2 := CoordinatesToPoint(c2)
+	testutils.Equal(t, p2, NewPoint(0, 0, 0))
+}
