@@ -1,9 +1,9 @@
 module github.com/InsideGallery/game-core
 
-go 1.24.3
+go 1.26.1
 
 require (
-	github.com/InsideGallery/core v1.0.6
+	github.com/InsideGallery/core v1.1.3
 	github.com/pkg/errors v0.9.1
 )
 
