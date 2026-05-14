@@ -3,7 +3,7 @@ package voronoi
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 	"github.com/InsideGallery/game-core/geometry/shapes"
 )
 
@@ -376,7 +376,7 @@ func TestHalfEdgesByCCWUpdateLinksMultiple(t *testing.T) {
 }
 
 func TestHalfEdgesByCCWLessNilTargets(t *testing.T) {
-	he1 := &HalfEdge{}        // nil Target
+	he1 := &HalfEdge{} // nil Target
 	he2 := &HalfEdge{Target: &Vertex{X: 1, Y: 1}}
 	edges := halfEdgesByCCW{he1, he2}
 	// nil target should not be less

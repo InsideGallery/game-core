@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestMin(t *testing.T) {

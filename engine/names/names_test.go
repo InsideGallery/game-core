@@ -3,7 +3,7 @@ package names
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestNamesComponent(t *testing.T) {

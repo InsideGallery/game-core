@@ -3,7 +3,7 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestNewBorder(t *testing.T) {
@@ -23,45 +23,45 @@ func TestBorder_Collision_Point(t *testing.T) {
 	border := NewBorder(NewBox(NewPoint(0, 0), 100, 100))
 
 	tests := map[string]struct {
-		obj        Spatial
-		dims       int
-		wantCol    bool
+		obj         Spatial
+		dims        int
+		wantCol     bool
 		wantNonZero bool
 	}{
 		"point inside": {
-			obj:        NewPoint(50, 50),
-			dims:       2,
-			wantCol:    false,
+			obj:         NewPoint(50, 50),
+			dims:        2,
+			wantCol:     false,
 			wantNonZero: false,
 		},
 		"point outside left": {
-			obj:        NewPoint(-5, 50),
-			dims:       2,
-			wantCol:    true,
+			obj:         NewPoint(-5, 50),
+			dims:        2,
+			wantCol:     true,
 			wantNonZero: true,
 		},
 		"point outside right": {
-			obj:        NewPoint(105, 50),
-			dims:       2,
-			wantCol:    true,
+			obj:         NewPoint(105, 50),
+			dims:        2,
+			wantCol:     true,
 			wantNonZero: true,
 		},
 		"point outside top": {
-			obj:        NewPoint(50, -5),
-			dims:       2,
-			wantCol:    true,
+			obj:         NewPoint(50, -5),
+			dims:        2,
+			wantCol:     true,
 			wantNonZero: true,
 		},
 		"point outside bottom": {
-			obj:        NewPoint(50, 105),
-			dims:       2,
-			wantCol:    true,
+			obj:         NewPoint(50, 105),
+			dims:        2,
+			wantCol:     true,
 			wantNonZero: true,
 		},
 		"point on boundary": {
-			obj:        NewPoint(0, 0),
-			dims:       2,
-			wantCol:    false,
+			obj:         NewPoint(0, 0),
+			dims:        2,
+			wantCol:     false,
 			wantNonZero: false,
 		},
 	}

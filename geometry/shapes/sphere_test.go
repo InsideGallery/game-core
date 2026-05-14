@@ -3,7 +3,7 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestNewSphere(t *testing.T) {
@@ -24,11 +24,11 @@ func TestSphere_Radius(t *testing.T) {
 
 func TestSphere_Move(t *testing.T) {
 	tests := map[string]struct {
-		center   Point
-		radius   float64
-		diff     Point
-		wantPos  Point
-		wantR    float64
+		center  Point
+		radius  float64
+		diff    Point
+		wantPos Point
+		wantR   float64
 	}{
 		"move positive": {
 			center:  NewPoint(1, 2, 3),

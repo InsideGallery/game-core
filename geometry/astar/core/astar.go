@@ -3,9 +3,9 @@ package core
 import (
 	"math"
 
-	"github.com/InsideGallery/core/memory/comparator"
-	"github.com/InsideGallery/core/memory/set"
-	"github.com/InsideGallery/core/memory/sortedset"
+	"github.com/FrogoAI/memory/comparator"
+	"github.com/FrogoAI/memory/sortedset"
+	"github.com/FrogoAI/set"
 )
 
 // https://isaaccomputerscience.org/concepts/dsa_search_a_star

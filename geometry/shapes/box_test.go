@@ -3,7 +3,7 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestBox(t *testing.T) {

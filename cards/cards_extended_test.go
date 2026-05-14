@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 // ---------- Deck tests ----------

@@ -3,7 +3,7 @@ package quickhull
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 	"github.com/InsideGallery/game-core/geometry/shapes"
 )
 
@@ -210,7 +210,8 @@ func TestConvexHullLargeCloud(t *testing.T) {
 		))
 	}
 	// Add extremes to ensure bounding box
-	pointCloud = append(pointCloud,
+	pointCloud = append(
+		pointCloud,
 		shapes.NewPoint(20, 0, 0),
 		shapes.NewPoint(-20, 0, 0),
 		shapes.NewPoint(0, 20, 0),

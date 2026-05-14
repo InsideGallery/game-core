@@ -3,7 +3,7 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestNewEllipsoid_ZeroSizes(t *testing.T) {
@@ -44,9 +44,9 @@ func TestEllipsoid_Size(t *testing.T) {
 		dim  int
 		want float64
 	}{
-		"dim 0": {dim: 0, want: 3},
-		"dim 1": {dim: 1, want: 4},
-		"dim 2": {dim: 2, want: 5},
+		"dim 0":                {dim: 0, want: 3},
+		"dim 1":                {dim: 1, want: 4},
+		"dim 2":                {dim: 2, want: 5},
 		"dim -1 out of bounds": {dim: -1, want: 0},
 		"dim 3 out of bounds":  {dim: 3, want: 0},
 	}

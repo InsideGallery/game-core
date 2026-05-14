@@ -3,7 +3,7 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestRotatableBox(t *testing.T) {
@@ -30,9 +30,9 @@ func TestRotatableBox_Size(t *testing.T) {
 		dim  int
 		want float64
 	}{
-		"dim 0": {dim: 0, want: 5},
-		"dim 1": {dim: 1, want: 10},
-		"dim 2": {dim: 2, want: 15},
+		"dim 0":                {dim: 0, want: 5},
+		"dim 1":                {dim: 1, want: 10},
+		"dim 2":                {dim: 2, want: 15},
 		"dim -1 out of bounds": {dim: -1, want: 0},
 		"dim 3 out of bounds":  {dim: 3, want: 0},
 	}

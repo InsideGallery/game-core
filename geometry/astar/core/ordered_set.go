@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/InsideGallery/core/memory/set"
+	"github.com/FrogoAI/set"
 )
 
 // GetPath return path

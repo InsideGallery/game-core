@@ -3,8 +3,8 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/mathutils"
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
+	"github.com/InsideGallery/game-core/mathutils"
 )
 
 func TestSphere(t *testing.T) {

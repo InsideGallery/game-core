@@ -3,7 +3,7 @@ package physics
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 	"github.com/InsideGallery/game-core/geometry/shapes"
 )
 

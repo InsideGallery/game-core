@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/InsideGallery/core/memory/registry"
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/memory/registry"
+	"github.com/FrogoAI/testutils"
 )
 
 // mockOutgoingMessage implements OutgoingMessage
@@ -175,7 +175,7 @@ func TestWriteSkipsWhenWaiting(t *testing.T) {
 
 func TestWriteOnClosedChannelDoesNotPanic(t *testing.T) {
 	c := NewCommunicateComponent(nil)
-	c.Close()
+	closeComponent(t, c)
 
 	// Should not panic due to defer recover
 	c.Write([]byte("after close"))
@@ -334,7 +334,7 @@ func TestSendSkipsWhenWaiting(t *testing.T) {
 
 func TestSendOnClosedChannelDoesNotPanic(t *testing.T) {
 	c := NewCommunicateComponent(nil)
-	c.Close()
+	closeComponent(t, c)
 	msg := &mockOutgoingMessage{msgType: 1, data: []byte("after close")}
 
 	// Should not panic due to defer recover
@@ -356,11 +356,7 @@ func TestStartReadingMessages(t *testing.T) {
 
 	// Poll with timeout for the atomic flag
 	deadline := time.After(time.Second)
-	for {
-		if cmd.executed.Load() {
-			break
-		}
-
+	for !cmd.executed.Load() {
 		select {
 		case <-deadline:
 			t.Fatal("timeout waiting for command execution")
@@ -379,7 +375,7 @@ func TestStartReadingMessagesStopsOnChannelClose(t *testing.T) {
 	c.StartReadingMessages(ctx)
 
 	// Close channels - goroutine should exit when incoming is closed
-	c.Close()
+	closeComponent(t, c)
 
 	// Give the goroutine time to finish
 	time.Sleep(50 * time.Millisecond)
@@ -389,7 +385,7 @@ func TestProcessOutgoingQueueOnClosedChannelDoesNotPanic(t *testing.T) {
 	c := NewCommunicateComponent(nil)
 	msg := &mockOutgoingMessage{msgType: 1, data: []byte("queued")}
 	c.AddMessageToQueue(msg)
-	c.Close()
+	closeComponent(t, c)
 
 	// Should not panic due to defer recover in ProcessOutgoingQueue -> Write
 	c.ProcessOutgoingQueue()
@@ -397,7 +393,7 @@ func TestProcessOutgoingQueueOnClosedChannelDoesNotPanic(t *testing.T) {
 
 func TestCloseWithConnection(t *testing.T) {
 	server, client := net.Pipe()
-	defer server.Close()
+	defer closeConnection(t, server)
 
 	c := NewCommunicateComponent(client)
 	err := c.Close()
@@ -485,13 +481,16 @@ type mockCommunication struct {
 	processed atomic.Bool
 }
 
-func (m *mockCommunication) ProcessOutgoingQueue()                                       { m.processed.Store(true) }
-func (m *mockCommunication) AddMessageToQueue(_ OutgoingMessage)                         {}
-func (m *mockCommunication) GetIncoming() chan []byte                                    { return nil }
-func (m *mockCommunication) GetOutgoing() chan []byte                                    { return nil }
-func (m *mockCommunication) ProcessIncomingMessages(_ context.Context, _ []byte) error   { return nil }
-func (m *mockCommunication) Close() error                                                { return nil }
-func (m *mockCommunication) Write(_ []byte)                                              {}
+func (m *mockCommunication) ProcessOutgoingQueue()               { m.processed.Store(true) }
+func (m *mockCommunication) AddMessageToQueue(_ OutgoingMessage) {}
+func (m *mockCommunication) GetIncoming() chan []byte            { return nil }
+
+func (m *mockCommunication) GetOutgoing() chan []byte { return nil }
+
+func (m *mockCommunication) ProcessIncomingMessages(_ context.Context, _ []byte) error { return nil }
+
+func (m *mockCommunication) Close() error   { return nil }
+func (m *mockCommunication) Write(_ []byte) {}
 
 func TestUpdateWithCommunicationEntity(t *testing.T) {
 	reg := registry.NewRegistry[any, any, any]()
@@ -544,4 +543,18 @@ func TestUpdateMultipleGroups(t *testing.T) {
 	testutils.Equal(t, err, nil)
 	testutils.Equal(t, mc1.processed.Load(), true)
 	testutils.Equal(t, mc2.processed.Load(), true)
+}
+
+func closeComponent(t testing.TB, c *CommunicateComponent) {
+	t.Helper()
+
+	err := c.Close()
+	testutils.Equal(t, err, nil)
+}
+
+func closeConnection(t testing.TB, conn net.Conn) {
+	t.Helper()
+
+	err := conn.Close()
+	testutils.Equal(t, err, nil)
 }

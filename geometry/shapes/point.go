@@ -3,7 +3,7 @@ package shapes
 import (
 	"math"
 
-	"github.com/InsideGallery/core/mathutils"
+	"github.com/InsideGallery/game-core/mathutils"
 )
 
 // Point describe point

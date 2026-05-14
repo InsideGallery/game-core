@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestAstar(t *testing.T) {

@@ -3,8 +3,8 @@ package communications
 import (
 	"context"
 
-	"github.com/InsideGallery/core/memory/registry"
-	"github.com/InsideGallery/core/multiproc/worker"
+	"github.com/FrogoAI/memory/registry"
+	"github.com/FrogoAI/multiproc/worker"
 )
 
 // OutgoingMessage describe outgoing message

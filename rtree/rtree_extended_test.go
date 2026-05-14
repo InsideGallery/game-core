@@ -3,7 +3,7 @@ package rtree
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 	"github.com/InsideGallery/game-core/geometry/shapes"
 )
 
@@ -290,7 +290,7 @@ func TestMoveObjectUpdatesPosition(t *testing.T) {
 
 	rt.MoveObject(obj, shapes.NewPoint(100, 200))
 	// After move, the object's internal position should have changed.
-	coords := obj.Sphere.Coordinates()
+	coords := obj.Coordinates()
 	testutils.Equal(t, coords[0], 110.0)
 	testutils.Equal(t, coords[1], 220.0)
 }

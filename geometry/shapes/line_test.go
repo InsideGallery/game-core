@@ -3,7 +3,7 @@ package shapes
 import (
 	"testing"
 
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestNewLine(t *testing.T) {
@@ -27,11 +27,11 @@ func TestLine_Point1Point2(t *testing.T) {
 
 func TestLine_Move(t *testing.T) {
 	tests := map[string]struct {
-		p1      Point
-		p2      Point
-		diff    Point
-		wantP1  Point
-		wantP2  Point
+		p1     Point
+		p2     Point
+		diff   Point
+		wantP1 Point
+		wantP2 Point
 	}{
 		"move positive": {
 			p1:     NewPoint(0, 0, 0),

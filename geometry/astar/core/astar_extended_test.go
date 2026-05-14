@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/InsideGallery/core/memory/set"
-	"github.com/InsideGallery/core/memory/sortedset"
-	"github.com/InsideGallery/core/testutils"
+	"github.com/FrogoAI/memory/sortedset"
+	"github.com/FrogoAI/set"
+	"github.com/FrogoAI/testutils"
 )
 
 func TestAddNeighborsFn(t *testing.T) {

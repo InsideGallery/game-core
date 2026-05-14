@@ -3,8 +3,8 @@ package relations
 import (
 	"testing"
 
+	"github.com/FrogoAI/testutils"
 	"github.com/InsideGallery/core/ecs"
-	"github.com/InsideGallery/core/testutils"
 )
 
 // ---------- SetParent / RemParent / GetParentID tests ----------
@@ -48,15 +48,26 @@ type mockChild struct {
 }
 
 func (m *mockChild) Parent(_ string) (Parent, error) { return nil, nil }
-func (m *mockChild) SetParent(_ string, _ uint64)     {}
-func (m *mockChild) RemParent(_ string)                {}
-func (m *mockChild) Construct() error                  { return nil }
-func (m *mockChild) Destroy() error                    { return nil }
+func (m *mockChild) SetParent(_ string, _ uint64)    {}
+func (m *mockChild) RemParent(_ string)              {}
+func (m *mockChild) Construct() error                { return nil }
+func (m *mockChild) Destroy() error                  { return nil }
+
+func newTestBaseEntityWithID(id uint64) *ecs.BaseEntity {
+	return ecs.NewRegistry().NewBaseEntityWithID(id)
+}
+
+func newMockChild(id uint64) *mockChild {
+	return &mockChild{
+		BaseEntity: newTestBaseEntityWithID(id),
+		id:         id,
+	}
+}
 
 func TestAttachAndGetChildren(t *testing.T) {
 	rc := NewRelationComponent(map[string]uint64{}, false)
-	c1 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(10), id: 10}
-	c2 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(11), id: 11}
+	c1 := newMockChild(10)
+	c2 := newMockChild(11)
 
 	rc.Attach("child", c1)
 	rc.Attach("child", c2)
@@ -67,8 +78,8 @@ func TestAttachAndGetChildren(t *testing.T) {
 
 func TestDetach(t *testing.T) {
 	rc := NewRelationComponent(map[string]uint64{}, false)
-	c1 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(10), id: 10}
-	c2 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(11), id: 11}
+	c1 := newMockChild(10)
+	c2 := newMockChild(11)
 
 	rc.Attach("child", c1)
 	rc.Attach("child", c2)
@@ -81,8 +92,8 @@ func TestDetach(t *testing.T) {
 
 func TestDetachNonExistentChild(t *testing.T) {
 	rc := NewRelationComponent(map[string]uint64{}, false)
-	c1 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(10), id: 10}
-	c2 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(11), id: 11}
+	c1 := newMockChild(10)
+	c2 := newMockChild(11)
 
 	rc.Attach("child", c1)
 	// Detaching c2 which was never attached should be a no-op
@@ -100,8 +111,8 @@ func TestGetChildrenNonExistentType(t *testing.T) {
 
 func TestGetAllChildren(t *testing.T) {
 	rc := NewRelationComponent(map[string]uint64{}, false)
-	c1 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(10), id: 10}
-	c2 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(11), id: 11}
+	c1 := newMockChild(10)
+	c2 := newMockChild(11)
 
 	rc.Attach("typeA", c1)
 	rc.Attach("typeB", c2)
@@ -114,12 +125,12 @@ func TestGetAllChildren(t *testing.T) {
 
 func TestGetAllChildrenReturnsCopy(t *testing.T) {
 	rc := NewRelationComponent(map[string]uint64{}, false)
-	c1 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(10), id: 10}
+	c1 := newMockChild(10)
 	rc.Attach("typeA", c1)
 
 	all := rc.GetAllChildren()
 	// Mutate returned map
-	all["typeA"] = append(all["typeA"], &mockChild{BaseEntity: ecs.NewBaseEntityWithID(99), id: 99})
+	all["typeA"] = append(all["typeA"], newMockChild(99))
 
 	// Original should not change
 	testutils.Equal(t, len(rc.GetChildren("typeA")), 1)
@@ -127,11 +138,11 @@ func TestGetAllChildrenReturnsCopy(t *testing.T) {
 
 func TestGetChildrenReturnsCopy(t *testing.T) {
 	rc := NewRelationComponent(map[string]uint64{}, false)
-	c1 := &mockChild{BaseEntity: ecs.NewBaseEntityWithID(10), id: 10}
+	c1 := newMockChild(10)
 	rc.Attach("typeA", c1)
 
 	children := rc.GetChildren("typeA")
-	children = append(children, &mockChild{BaseEntity: ecs.NewBaseEntityWithID(99), id: 99})
+	children = append(children, newMockChild(99))
 	_ = children
 	testutils.Equal(t, len(rc.GetChildren("typeA")), 1)
 }

@@ -3,8 +3,8 @@ package relations
 import (
 	"testing"
 
+	"github.com/FrogoAI/testutils"
 	"github.com/InsideGallery/core/ecs"
-	"github.com/InsideGallery/core/testutils"
 )
 
 var (
@@ -19,7 +19,7 @@ type ExampleParent struct {
 
 func NewExampleParent() *ExampleParent {
 	p := &ExampleParent{
-		BaseEntity:        ecs.NewBaseEntityWithID(1),
+		BaseEntity:        newTestBaseEntityWithID(1),
 		RelationComponent: NewRelationComponent(map[string]uint64{}, false),
 	}
 	err := store.Add(exampleParentKey, p.GetID(), p)
@@ -36,7 +36,7 @@ type ExampleChild struct {
 
 func NewExampleChild() *ExampleChild {
 	c := &ExampleChild{
-		BaseEntity: ecs.NewBaseEntityWithID(2),
+		BaseEntity: newTestBaseEntityWithID(2),
 		RelationComponent: NewRelationComponent(map[string]uint64{
 			exampleParentKey: 1,
 		}, false),

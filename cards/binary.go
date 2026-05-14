@@ -3,7 +3,7 @@ package cards
 import (
 	"sort"
 
-	"github.com/InsideGallery/core/memory/set"
+	"github.com/FrogoAI/set"
 )
 
 const (

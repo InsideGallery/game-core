@@ -3,7 +3,7 @@ package relations
 import (
 	"sync"
 
-	"github.com/InsideGallery/core/memory/registry"
+	"github.com/FrogoAI/memory/registry"
 )
 
 var store = registry.NewRegistry[string, uint64, any]()

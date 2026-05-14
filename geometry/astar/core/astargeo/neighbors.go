@@ -1,8 +1,8 @@
 package astargeo
 
 import (
-	"github.com/InsideGallery/core/memory/set"
-	"github.com/InsideGallery/core/memory/sortedset"
+	"github.com/FrogoAI/memory/sortedset"
+	"github.com/FrogoAI/set"
 	"github.com/InsideGallery/game-core/geometry/astar/core"
 	"github.com/InsideGallery/game-core/geometry/shapes"
 	rtree2 "github.com/InsideGallery/game-core/rtree"
