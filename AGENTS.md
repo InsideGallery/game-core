@@ -7,9 +7,9 @@ This file provides guidance to AI coding assistants (Claude Code, Copilot, Curso
 `game-core` is a shared Go vendor library for InsideGallery game projects. It provides reusable game-development packages imported via `go get github.com/InsideGallery/game-core`. There is no `main()` -- this is a library, not an application.
 
 - **Module**: `github.com/InsideGallery/game-core`
-- **Go version**: 1.24.3
+- **Go version**: 1.26.3
 - **Type**: Vendor library (`go get`-able, no `cmd/`, no `main.go`)
-- **Depends on**: `github.com/InsideGallery/core`
+- **Depends on**: `github.com/InsideGallery/core` v1.2.1 plus extracted FrogoAI helper modules
 
 ## 2. Directory Structure
 
@@ -22,6 +22,8 @@ This file provides guidance to AI coding assistants (Claude Code, Copilot, Curso
 | `engine/relations/` | Relationship systems |
 | `geometry/` | Geometry utilities |
 | `geometry/astar/` | A* pathfinding algorithm |
+| `geometry/astar/core/` | Core A* node and path search primitives |
+| `geometry/astar/core/astargeo/` | Geometry-backed A* neighbor lookup |
 | `geometry/gjkepa2d/` | GJK/EPA 2D collision detection |
 | `geometry/gjkepa3d/` | GJK/EPA 3D collision detection |
 | `geometry/hexagone/` | Hexagonal grid utilities |
@@ -32,6 +34,26 @@ This file provides guidance to AI coding assistants (Claude Code, Copilot, Curso
 | `mathutils/` | Math utilities for game development |
 | `physics/` | Physics simulation |
 | `rtree/` | R-tree spatial indexing |
+
+Every Go package directory must have a local `README.md` with the package import path, a concise overview, and the
+most important exported types/functions or behavior. When package behavior changes, update that package README in the
+same change.
+
+### Dependency Notes
+
+`github.com/InsideGallery/core` v1.2.1 no longer contains several packages that older `game-core` imports used. Use
+the extracted modules directly:
+
+| Old package prefix | Current package prefix |
+|--------------------|------------------------|
+| `github.com/InsideGallery/core/memory/comparator` | `github.com/FrogoAI/memory/comparator` |
+| `github.com/InsideGallery/core/memory/registry` | `github.com/FrogoAI/memory/registry` |
+| `github.com/InsideGallery/core/memory/sortedset` | `github.com/FrogoAI/memory/sortedset` |
+| `github.com/InsideGallery/core/memory/set` | `github.com/FrogoAI/set` |
+| `github.com/InsideGallery/core/multiproc/worker` | `github.com/FrogoAI/multiproc/worker` |
+| `github.com/InsideGallery/core/testutils` | `github.com/FrogoAI/testutils` |
+
+Use `github.com/InsideGallery/game-core/mathutils` for math helpers owned by this module.
 
 ## 3. Mandatory Post-Change Verification
 
