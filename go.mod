@@ -8,6 +8,7 @@ require (
 	github.com/FrogoAI/set v1.1.0
 	github.com/FrogoAI/testutils v0.0.0-20260120234612-cf743e4bd16a
 	github.com/InsideGallery/core v1.2.1
+	github.com/hajimehoshi/ebiten/v2 v2.9.9
 	github.com/pkg/errors v0.9.1
 )
 
@@ -16,7 +17,6 @@ require (
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.9.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hajimehoshi/ebiten/v2 v2.9.9 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/mfonda/simhash v0.0.0-20151007195837-79f94a1100d6 // indirect
 	github.com/sirbu/golang-common v0.0.0-20170403140351-21d4febd4bca // indirect
