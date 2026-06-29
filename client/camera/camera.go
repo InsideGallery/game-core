@@ -51,5 +51,6 @@ func (c *Camera) ScreenToWorld(sx, sy float64) (float64, float64) {
 
 // WorldToScreen converts world coordinates to screen coordinates.
 func (c *Camera) WorldToScreen(wx, wy float64) (float64, float64) {
-	return c.WorldMatrix().Apply(wx, wy)
+	m := c.WorldMatrix()
+	return m.Apply(wx, wy)
 }
