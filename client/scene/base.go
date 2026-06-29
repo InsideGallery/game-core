@@ -22,6 +22,7 @@ type BaseScene struct {
 	Camera   *camera.Camera
 	Bus      *event.Bus
 	World    *ebiten.Image // offscreen World buffer; systems draw here in world coords
+	vpW, vpH int           // current viewport dimensions; guards World reallocation
 }
 
 // NewBaseScene creates a BaseScene with all ECS infrastructure initialized.
@@ -43,14 +44,24 @@ func NewBaseScene(ctx context.Context, bus *event.Bus, vpW, vpH int) *BaseScene 
 		Bus:      bus,
 		Camera:   cam,
 		World:    world,
+		vpW:      vpW,
+		vpH:      vpH,
 	}
 }
 
-// SetViewPort resizes the camera viewport and recreates the World buffer.
+// viewportNeedsResize reports whether the World buffer should be recreated.
+// Extracted as a pure helper so it can be tested without an *ebiten.Image.
+func viewportNeedsResize(curW, curH, newW, newH int, hasWorld bool) bool {
+	return !hasWorld || newW != curW || newH != curH
+}
+
+// SetViewPort resizes the camera viewport and recreates the World buffer only when dimensions change.
 func (b *BaseScene) SetViewPort(w, h int) {
 	b.Camera.SetViewPort(w, h)
-	if w > 0 && h > 0 {
+	if w > 0 && h > 0 && viewportNeedsResize(b.vpW, b.vpH, w, h, b.World != nil) {
 		b.World = ebiten.NewImage(w, h)
+		b.vpW = w
+		b.vpH = h
 	}
 }
 
