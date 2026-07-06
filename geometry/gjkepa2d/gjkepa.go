@@ -215,7 +215,12 @@ func (g *GJKEPA) EPA(_, _ shapes.Collide) shapes.Point {
 			return intersection
 		}
 
-		g.vertices[edge.index] = support
+		// expand the polytope: insert the support point between the closest
+		// edge's endpoints (edge.index is the second endpoint), keeping hull order
+		g.vertices = append(
+			g.vertices[:edge.index],
+			append([]shapes.Point{support}, g.vertices[edge.index:]...)...,
+		)
 	}
 
 	return minIntersection
