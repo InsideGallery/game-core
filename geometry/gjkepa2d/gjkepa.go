@@ -38,6 +38,7 @@ func NewEdge(distance float64, normal shapes.Point, index int) *Edge {
 // GJKEPA gjk epa collision checker
 type GJKEPA struct {
 	vertices  []shapes.Point
+	edges     []edgeData
 	direction shapes.Point
 	shapeA    shapes.Collide
 	shapeB    shapes.Collide
@@ -45,7 +46,12 @@ type GJKEPA struct {
 
 // NewGJKEPA return new 2d collision checker
 func NewGJKEPA() *GJKEPA {
-	return &GJKEPA{}
+	return &GJKEPA{
+		// GJK needs at most 3 vertices; EPA inserts at most one per iteration.
+		// Preallocating lets GJK/EPA run without growing the buffers.
+		vertices: make([]shapes.Point, 0, 3+EPAMaxNumIterations),
+		edges:    make([]edgeData, 0, 3+EPAMaxNumIterations),
+	}
 }
 
 // calculateSupport calculate support point
@@ -121,7 +127,7 @@ func (g *GJKEPA) evolveSimplex() int {
 
 // GJK check GJK collision
 func (g *GJKEPA) GJK(shapeA, shapeB shapes.Collide, calculateMTV bool) (bool, shapes.Point) {
-	g.vertices = []shapes.Point{}
+	g.vertices = g.vertices[:0]
 	g.shapeA = shapeA
 	g.shapeB = shapeB
 
@@ -140,41 +146,50 @@ func (g *GJKEPA) GJK(shapeA, shapeB shapes.Collide, calculateMTV bool) (bool, sh
 	return i, p
 }
 
-// findClosestEdge calculate closest edge
-func (g *GJKEPA) findClosestEdge(winding int) *Edge {
-	var closestIndex int
-	var closestNormal shapes.Point
-	closestDistance := math.MaxFloat64
+// edgeData caches a polytope edge's outward normal and its distance from
+// the origin, so EPA recomputes only the two edges an insertion creates
+// instead of every edge on every iteration.
+type edgeData struct {
+	dist   float64
+	nx, ny float64
+}
 
-	for i := range g.vertices {
-		j := i + 1
-		if j >= len(g.vertices) {
-			j = 0
-		}
-
-		line := g.vertices[j].Subtract(g.vertices[i])
-		var norm shapes.Point
-
-		switch winding {
-		case Clockwise:
-			norm = shapes.NewPoint(line.Coordinate(1), line.Coordinate(0)*-1)
-		case CounterClockwise:
-			norm = shapes.NewPoint(line.Coordinate(1)*-1, line.Coordinate(0))
-		default:
-			return nil
-		}
-
-		norm = norm.Normalize()
-		dist := norm.Dot(g.vertices[i])
-
-		if dist < closestDistance {
-			closestDistance = dist
-			closestNormal = norm
-			closestIndex = j
-		}
+// computeEdge calculates the polytope edge starting at vertex i. The scalar
+// math mirrors the shapes.Point operations it replaces (Subtract, Normalize
+// with its zero-length guard, Dot with a zero z-term) so results are
+// bit-identical; it just avoids allocating Points in EPA's hottest loop.
+func (g *GJKEPA) computeEdge(winding, i int) edgeData {
+	j := i + 1
+	if j >= len(g.vertices) {
+		j = 0
 	}
 
-	return NewEdge(closestDistance, closestNormal, closestIndex)
+	lx := g.vertices[j].Coordinate(0) - g.vertices[i].Coordinate(0)
+	ly := g.vertices[j].Coordinate(1) - g.vertices[i].Coordinate(1)
+
+	var nx, ny float64
+
+	switch winding {
+	case Clockwise:
+		nx, ny = ly, lx*-1
+	case CounterClockwise:
+		nx, ny = ly*-1, lx
+	default:
+		return edgeData{} // unreachable: EPA always passes a valid winding
+	}
+
+	// Point.Normalize: length via sqrt(dot), zero guard, then divide
+	n := math.Sqrt(nx*nx + ny*ny)
+	if n < math.SmallestNonzeroFloat64 {
+		nx, ny = 0, 0
+	} else {
+		nx /= n
+		ny /= n
+	}
+
+	dist := nx*g.vertices[i].Coordinate(0) + ny*g.vertices[i].Coordinate(1)
+
+	return edgeData{dist: dist, nx: nx, ny: ny}
 }
 
 // EPA calculate EPA intersection point
@@ -194,34 +209,74 @@ func (g *GJKEPA) EPA(_, _ shapes.Collide) shapes.Point {
 		winding = CounterClockwise
 	}
 
-	var minIntersection shapes.Point
+	g.edges = g.edges[:0]
+	for i := range g.vertices {
+		g.edges = append(g.edges, g.computeEdge(winding, i))
+	}
+
 	minDistance := math.MaxFloat64
-	var intersection shapes.Point
+
+	var minIX, minIY float64
 
 	for i := 0; i < EPAMaxNumIterations; i++ {
-		edge := g.findClosestEdge(winding)
-		support := g.calculateSupport(edge.normal)
-		distance := support.Dot(edge.normal)
+		// closest cached edge; seeding with MaxFloat64 keeps the earliest
+		// strict minimum and skips NaN/+Inf distances exactly like the full
+		// rescan this replaces
+		var edge edgeData
 
-		intersection = edge.normal.Copy()
-		intersection = intersection.Scale(distance).Invert()
+		edge.dist = math.MaxFloat64
+		closest := -1
+
+		for e := range g.edges {
+			if g.edges[e].dist < edge.dist {
+				edge = g.edges[e]
+				closest = e
+			}
+		}
+
+		normal := shapes.NewPoint(edge.nx, edge.ny)
+		support := g.calculateSupport(normal)
+		distance := support.Dot(normal)
+
+		ix := edge.nx * distance * -1
+		iy := edge.ny * distance * -1
 
 		if distance < minDistance {
 			minDistance = distance
-			minIntersection = intersection
+			minIX, minIY = ix, iy
 		}
 
-		if math.Abs(distance-edge.distance) <= 0.000001 { //nolint:mnd
-			return intersection
+		if math.Abs(distance-edge.dist) <= 0.000001 { //nolint:mnd
+			return shapes.NewPoint(ix, iy)
 		}
 
 		// expand the polytope: insert the support point between the closest
-		// edge's endpoints (edge.index is the second endpoint), keeping hull order
-		g.vertices = append(
-			g.vertices[:edge.index],
-			append([]shapes.Point{support}, g.vertices[edge.index:]...)...,
-		)
+		// edge's endpoints (index k, its second endpoint), keeping hull
+		// order; shifting in place avoids reallocating every iteration.
+		// closest == -1 (every distance NaN) mirrors the original's
+		// zero-value index 0
+		k := 0
+		if closest >= 0 && closest+1 < len(g.vertices) {
+			k = closest + 1
+		}
+
+		g.vertices = append(g.vertices, shapes.Point{})
+		copy(g.vertices[k+1:], g.vertices[k:])
+		g.vertices[k] = support
+
+		// the insertion replaces one edge with two; every other edge keeps
+		// its vertex pair, so only those two need recomputing
+		g.edges = append(g.edges, edgeData{})
+		copy(g.edges[k+1:], g.edges[k:])
+
+		prev := k - 1
+		if prev < 0 {
+			prev = len(g.edges) - 1
+		}
+
+		g.edges[prev] = g.computeEdge(winding, prev)
+		g.edges[k] = g.computeEdge(winding, k)
 	}
 
-	return minIntersection
+	return shapes.NewPoint(minIX, minIY)
 }

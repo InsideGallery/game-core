@@ -40,11 +40,16 @@ closed form exists.
 Benchmarks (go1.x, AMD64, corner-contact circle vs box, `-benchmem`):
 
 ```
-BenchmarkMTVCircleBoxAnalytic-16      6782956    174.8 ns/op     80 B/op    2 allocs/op
-BenchmarkMTVCircleBoxEPA-16             17257    80967 ns/op  10120 B/op   67 allocs/op
-BenchmarkMTVCirclePolygonAnalytic-16  4934608    283.9 ns/op     56 B/op    2 allocs/op
+BenchmarkMTVCircleBoxAnalytic-16          7074780    169.2 ns/op    80 B/op   2 allocs/op
+BenchmarkMTVCircleBoxEPA-16                 85772    13976 ns/op  3664 B/op   4 allocs/op
+BenchmarkMTVCircleBoxEPAReusedChecker-16   109214    10559 ns/op    80 B/op   2 allocs/op
+BenchmarkMTVCirclePolygonAnalytic-16      4805600    268.5 ns/op    56 B/op   2 allocs/op
 ```
 
-The analytic path is ~460x faster than EPA for the same contact and does not
-allocate beyond the returned point.
+EPA caches per-edge normals/distances (recomputing only the two edges each
+polytope insertion creates), inserts support points in place, and reuses
+preallocated buffers, so a reused `GJKEPA` checker runs steady-state
+allocation-free; the remaining EPA cost is the per-iteration shape
+`Support` calls. The analytic path is still ~60-80x faster than EPA for the
+same contact and neither allocates beyond the returned point.
 

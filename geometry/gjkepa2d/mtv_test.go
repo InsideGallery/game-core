@@ -271,6 +271,18 @@ func BenchmarkMTVCircleBoxEPA(b *testing.B) {
 	}
 }
 
+func BenchmarkMTVCircleBoxEPAReusedChecker(b *testing.B) {
+	box := shapes.NewBox(shapes.NewPoint(18.5, 3.5), 1, 1)
+	circle := shapes.NewSphere(shapes.NewPoint(19.60141, 4.57531), 0.25)
+	g := NewGJKEPA()
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		g.GJK(box, circle, true)
+	}
+}
+
 func BenchmarkMTVCirclePolygonAnalytic(b *testing.B) {
 	square := shapes.NewPolyhedron(
 		shapes.NewPoint(0, 0),
