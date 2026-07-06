@@ -118,7 +118,7 @@ func TestEPA_CircleBoxPropertyMatchesClosedForm(t *testing.T) {
 	centers := []shapes.Point{
 		corner.Add(shapes.NewPoint(diag, diag).Scale(r * 0.99)), // shallow corner
 		corner.Add(shapes.NewPoint(diag, diag).Scale(0.01)),     // deep corner
-		shapes.NewPoint(19.5 + r*0.99, 4.0),                     // shallow face
+		shapes.NewPoint(19.5+r*0.99, 4.0),                       // shallow face
 		shapes.NewPoint(19.51, 4.0),                             // deep face
 	}
 
