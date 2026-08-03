@@ -7,7 +7,7 @@ require (
 	github.com/FrogoAI/multiproc v1.0.0
 	github.com/FrogoAI/set v1.1.0
 	github.com/FrogoAI/testutils v0.0.0-20260120234612-cf743e4bd16a
-	github.com/InsideGallery/core v1.2.1
+	github.com/InsideGallery/core v1.2.2
 	github.com/hajimehoshi/ebiten/v2 v2.9.9
 	github.com/pkg/errors v0.9.1
 )
