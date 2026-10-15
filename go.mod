@@ -10,15 +10,18 @@ require (
 	github.com/InsideGallery/core v1.2.1
 	github.com/hajimehoshi/ebiten/v2 v2.9.9
 	github.com/pkg/errors v0.9.1
+	golang.org/x/image v0.31.0
 )
 
 require (
 	github.com/ebitengine/gomobile v0.0.0-20250923094054-ea854a63cce1 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.9.0 // indirect
+	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/mfonda/simhash v0.0.0-20151007195837-79f94a1100d6 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sirbu/golang-common v0.0.0-20170403140351-21d4febd4bca // indirect
 	github.com/twmb/murmur3 v1.1.8 // indirect
 	go.mongodb.org/mongo-driver v1.17.6 // indirect
