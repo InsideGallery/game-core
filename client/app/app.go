@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"log/slog"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -14,6 +15,8 @@ import (
 type Config struct {
 	Width, Height int
 	Title         string
+	// Responsive: when true, Layout ignores Width and Height and returns the outside size times the device scale.
+	Responsive bool
 	// Setup creates scenes, registers them with the manager, and returns the initial scene name.
 	Setup func(ctx context.Context, bus *event.Bus, m *scene.Manager, switchScene func(string)) string
 }
@@ -75,23 +78,52 @@ type viewPortSetter interface {
 	SetViewPort(w, h int)
 }
 
-// Layout returns the logical window size from Config and propagates it to the active scene if it
-// implements viewPortSetter (e.g. a *BaseScene).
-func (a *App) Layout(_, _ int) (int, int) {
+// DeviceScale returns the device scale factor of the monitor, or 1 when it is unknown.
+func DeviceScale() float64 {
+	m := ebiten.Monitor()
+	if m == nil {
+		return 1
+	}
+
+	if f := m.DeviceScaleFactor(); f > 0 {
+		return f
+	}
+
+	return 1
+}
+
+// logicalSize converts an outside size to a logical size by the device scale, rounding up.
+func logicalSize(ow, oh int, scale float64) (int, int) {
+	return int(math.Ceil(float64(ow) * scale)), int(math.Ceil(float64(oh) * scale))
+}
+
+// Layout returns the logical window size and propagates it to the active scene if it implements
+// viewPortSetter (e.g. a *BaseScene). With Config.Responsive it follows the outside size times the
+// device scale; otherwise it returns Config.Width and Config.Height.
+func (a *App) Layout(outsideW, outsideH int) (int, int) {
+	w, h := a.cfg.Width, a.cfg.Height
+	if a.cfg.Responsive {
+		w, h = logicalSize(outsideW, outsideH, DeviceScale())
+	}
+
 	sc := a.manager.Scene()
 	if sc != nil {
 		if vps, ok := sc.(viewPortSetter); ok {
-			vps.SetViewPort(a.cfg.Width, a.cfg.Height)
+			vps.SetViewPort(w, h)
 		}
 	}
 
-	return a.cfg.Width, a.cfg.Height
+	return w, h
 }
 
 // Run configures the Ebiten window and starts the game loop.
 func Run(a *App) error {
 	ebiten.SetWindowSize(a.cfg.Width, a.cfg.Height)
 	ebiten.SetWindowTitle(a.cfg.Title)
+
+	if a.cfg.Responsive {
+		ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	}
 
 	return ebiten.RunGame(a)
 }

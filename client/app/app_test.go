@@ -113,11 +113,11 @@ type stubScene struct {
 	name string
 }
 
-func (s *stubScene) Name() string                    { return s.name }
-func (s *stubScene) Load(_ context.Context)          {}
-func (s *stubScene) Unload(_ context.Context)        {}
-func (s *stubScene) Update(_ context.Context) error  { return nil }
-func (s *stubScene) Draw(_ *ebiten.Image) {}
+func (s *stubScene) Name() string                   { return s.name }
+func (s *stubScene) Load(_ context.Context)         {}
+func (s *stubScene) Unload(_ context.Context)       {}
+func (s *stubScene) Update(_ context.Context) error { return nil }
+func (s *stubScene) Draw(_ *ebiten.Image)           {}
 
 // spyViewPortSetter wraps stubScene and implements viewPortSetter.
 type spyViewPortSetter struct {
@@ -130,4 +130,32 @@ func (s *spyViewPortSetter) SetViewPort(w, h int) {
 	s.setViewPortCalled = true
 	s.vpW = w
 	s.vpH = h
+}
+
+func TestLogicalSize(t *testing.T) {
+	tests := []struct {
+		ow, oh       int
+		scale        float64
+		wantW, wantH int
+	}{
+		{390, 844, 3, 1170, 2532},
+		{100, 100, 1.5, 150, 150},
+		{101, 101, 1.5, 152, 152},
+	}
+
+	for _, tt := range tests {
+		w, h := logicalSize(tt.ow, tt.oh, tt.scale)
+		if w != tt.wantW || h != tt.wantH {
+			t.Errorf("logicalSize(%d,%d,%v): want %dx%d, got %dx%d", tt.ow, tt.oh, tt.scale, tt.wantW, tt.wantH, w, h)
+		}
+	}
+}
+
+func TestLayoutFixedIgnoresOutside(t *testing.T) {
+	a := New(Config{Width: 640, Height: 360, Responsive: false})
+
+	w, h := a.Layout(1000, 1000)
+	if w != 640 || h != 360 {
+		t.Fatalf("Layout: want 640x360, got %dx%d", w, h)
+	}
 }
