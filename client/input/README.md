@@ -9,5 +9,10 @@ One pointer for touch and mouse that reports taps and drags. Source is the first
 - `Pointer.Tap()`: position and true on the frame a press ends within slop of where it started.
 - `Pointer.Drag()`: movement since the last frame while a press has moved beyond slop.
 - `Pointer.Wheel()`: vertical mouse wheel delta.
+- `Pointer.Hover()`: mouse position and true while no button is down; never true for a touch.
+- `Pointer.Press()`: current position and true while a press is down and has not become a drag.
+- `NewPointerFrom(slop, src)`: a Pointer on a replaceable `Source`; `NewPointer` uses `EbitenSource()`.
+- `Source`, `Sample`: one frame of raw input (`X, Y, Pressed, Touch, Wheel`); tests pass a fake.
+- `SetHand(on)`: hand cursor when on, default arrow when off; no effect on a phone. Call once per `Update`.
 
 The state machine lives in the unexported `tracker`, tested without ebiten input. Out of scope: multi-touch, gestures, keyboard.

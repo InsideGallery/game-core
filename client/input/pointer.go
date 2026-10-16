@@ -1,34 +1,38 @@
 // Package input reads one pointer, touch or mouse, and reports taps and drags.
 package input
 
-import "github.com/hajimehoshi/ebiten/v2"
-
-// Pointer reports taps, drags and wheel movement for the first touch or the left mouse button.
+// Pointer reports taps, drags, hover, press and wheel movement for the first touch or the left mouse button.
 type Pointer struct {
-	tr    *tracker
-	ev    event
-	wheel float64
-	ids   []ebiten.TouchID
+	tr     *tracker
+	src    Source
+	ev     event
+	sample Sample
 }
 
-// NewPointer creates a Pointer. slop is in logical pixels; callers pass 10 times the device scale.
+// NewPointer creates a Pointer on the ebiten input. slop is in logical pixels; callers pass 10 times the device scale.
 func NewPointer(slop float64) *Pointer {
-	return &Pointer{tr: newTracker(slop)}
+	return NewPointerFrom(slop, EbitenSource())
+}
+
+// NewPointerFrom creates a Pointer that reads from src.
+func NewPointerFrom(slop float64, src Source) *Pointer {
+	return &Pointer{tr: newTracker(slop), src: src}
 }
 
 // Update reads the input once per frame.
 func (p *Pointer) Update() {
-	p.ids = ebiten.AppendTouchIDs(p.ids[:0])
+	p.sample = p.src.Read()
+	p.ev = p.tr.step(p.sample.Pressed, p.sample.X, p.sample.Y)
+}
 
-	if len(p.ids) > 0 {
-		x, y := ebiten.TouchPosition(p.ids[0])
-		p.ev = p.tr.step(true, float64(x), float64(y))
-	} else {
-		x, y := ebiten.CursorPosition()
-		p.ev = p.tr.step(ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft), float64(x), float64(y))
-	}
+// Hover returns the mouse position while no button is down. It is never ok for a touch.
+func (p *Pointer) Hover() (x, y float64, ok bool) {
+	return p.sample.X, p.sample.Y, !p.sample.Touch && !p.sample.Pressed
+}
 
-	_, p.wheel = ebiten.Wheel()
+// Press returns the current position while a press is down and has not become a drag.
+func (p *Pointer) Press() (x, y float64, ok bool) {
+	return p.sample.X, p.sample.Y, p.tr.pressing()
 }
 
 // Tap returns the position of a tap that ended this frame.
@@ -43,5 +47,5 @@ func (p *Pointer) Drag() (dx, dy float64, active bool) {
 
 // Wheel returns the vertical mouse wheel delta of this frame.
 func (p *Pointer) Wheel() float64 {
-	return p.wheel
+	return p.sample.Wheel
 }

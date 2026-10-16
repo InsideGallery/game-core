@@ -42,3 +42,29 @@ func TestTrackerDrag(t *testing.T) {
 		t.Fatalf("release must not tap: %+v", ev)
 	}
 }
+
+func TestTrackerPressing(t *testing.T) {
+	tr := newTracker(10)
+
+	if tr.pressing() {
+		t.Fatal("idle tracker pressing")
+	}
+
+	tr.step(true, 0, 0)
+
+	if !tr.pressing() {
+		t.Fatal("held press not pressing")
+	}
+
+	tr.step(true, 0, 30)
+
+	if tr.pressing() {
+		t.Fatal("drag still pressing")
+	}
+
+	tr.step(false, 0, 0)
+
+	if tr.pressing() {
+		t.Fatal("released still pressing")
+	}
+}

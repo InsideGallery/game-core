@@ -59,3 +59,8 @@ func (t *tracker) step(pressed bool, x, y float64) event {
 
 	return ev
 }
+
+// pressing reports a press that is down and has not become a drag.
+func (t *tracker) pressing() bool {
+	return t.down && !t.dragging
+}
