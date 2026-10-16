@@ -33,3 +33,16 @@ func (v *View) AtEnd(margin float64) bool {
 func (v *View) Visible(top, height float64) bool {
 	return top+height > v.Offset && top < v.Offset+v.ViewportH
 }
+
+// Bar returns the scroll bar of the current offset in viewport coordinates (0 is the viewport top).
+// ok is false when nothing scrolls. The length is at least minLen and at most ViewportH.
+func (v *View) Bar(minLen float64) (top, length float64, ok bool) {
+	if v.ViewportH <= 0 || v.ContentH <= v.ViewportH {
+		return 0, 0, false
+	}
+
+	length = min(max(minLen, v.ViewportH*v.ViewportH/v.ContentH), v.ViewportH)
+	top = (v.ViewportH - length) * v.Offset / (v.ContentH - v.ViewportH)
+
+	return top, length, true
+}

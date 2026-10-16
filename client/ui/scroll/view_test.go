@@ -52,3 +52,27 @@ func TestVisible(t *testing.T) {
 		}
 	}
 }
+
+func TestBar(t *testing.T) {
+	for _, tc := range []struct{ offset, top, length float64 }{{0, 0, 400}, {400, 200, 400}, {800, 400, 400}} {
+		v := &View{Offset: tc.offset, ViewportH: 800, ContentH: 1600}
+		top, length, ok := v.Bar(24)
+		if !ok || top != tc.top || length != tc.length {
+			t.Fatalf("offset %v: got (%v, %v, %v)", tc.offset, top, length, ok)
+		}
+	}
+}
+
+func TestBarMinLength(t *testing.T) {
+	v := &View{ViewportH: 800, ContentH: 80000}
+	if _, length, ok := v.Bar(24); !ok || length != 24 {
+		t.Fatalf("got length %v ok %v", length, ok)
+	}
+}
+
+func TestBarHidden(t *testing.T) {
+	v := &View{ViewportH: 800, ContentH: 500}
+	if _, _, ok := v.Bar(24); ok {
+		t.Fatal("want hidden")
+	}
+}
